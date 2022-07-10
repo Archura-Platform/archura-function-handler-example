@@ -17,7 +17,7 @@
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId>
+            <artifactId>spring-boot-starter-web</artifactId>
             <version>2.7.0</version>
             <scope>provided</scope>
         </dependency>
@@ -57,6 +57,7 @@
                                     <mainClass>io.archura.platform.SimpleFunction</mainClass>
                                 </transformer>
                             </transformers>
+                            <finalName>io.archura.platform.SimpleFunction-0.0.1</finalName>
                         </configuration>
                     </execution>
                 </executions>
@@ -69,7 +70,7 @@
                         <phase>package</phase>
                         <configuration>
                             <target>
-                                <copy todir="/tmp/">
+                                <copy todir="/Users/ymor/github/canmogol/archura-config/jars/">
                                     <fileset dir="${basedir}/target/" includes="*.jar"/>
                                 </copy>
                             </target>
