@@ -70,7 +70,7 @@
                         <phase>package</phase>
                         <configuration>
                             <target>
-                                <copy todir="/Users/ymor/github/canmogol/archura-config/jars/">
+                                <copy todir="${basedir}/../archura-platform-config-example/jars/">
                                     <fileset dir="${basedir}/target/" includes="*.jar"/>
                                 </copy>
                             </target>
