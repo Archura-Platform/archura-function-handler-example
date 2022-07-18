@@ -15,35 +15,37 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;
 
 @Component
 public class SimpleFunction implements HandlerFunction<ServerResponse>, Configurable {
 
-    private Map<String, Object> configuration;
+    private final Map<String, Object> configuration = new HashMap<>();
+    private final HttpClient buildInHttpClient = HttpClient.newBuilder().executor(Executors.newSingleThreadExecutor()).build();
 
     @Override
     public void setConfiguration(Map<String, Object> config) {
-        this.configuration = config;
+        this.configuration.putAll(config);
     }
 
     @Override
     public ServerResponse handle(ServerRequest request) throws IOException, InterruptedException {
-        System.out.println("SimpleFunction request = " + request + " configuration: " + configuration);
-
+        log("SimpleFunction request = " + request + " configuration: " + configuration);
         request.attribute(Cache.class.getSimpleName())
                 .map(Cache.class::cast)
                 .ifPresent(cache -> {
                     try {
                         final Class<? extends Cache> aClass = cache.getClass();
                         final Field[] declaredFields = aClass.getDeclaredFields();
-                        System.out.println("declaredFields.length = " + declaredFields.length);
+                        log("declaredFields.length = " + declaredFields.length);
                         for (Field field : declaredFields) {
                             field.setAccessible(true);
                             final Object value = field.get(cache);
-                            System.out.println("field = " + field + " value: " + value);
+                            log("field = " + field + " value: " + value);
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -58,13 +60,20 @@ public class SimpleFunction implements HandlerFunction<ServerResponse>, Configur
                     final String keyValues = "keyValues";
                     cache.put(keyValues, cacheData);
                     final Map<String, Object> map = cache.get(keyValues);
-                    System.out.println("map = " + map);
+                    log("map = " + map);
                 });
 
-        final HttpClient httpClient = HttpClient.newHttpClient();
+        final HttpClient httpClient = request.attribute(HttpClient.class.getSimpleName())
+                .map(HttpClient.class::cast)
+                .orElseGet(() -> {
+                    log("No HttpClient provided, will use the internal HttpClient.");
+                    return buildInHttpClient;
+                });
+
         final HttpRequest httpRequest = HttpRequest.newBuilder()
                 .GET()
-                .uri(URI.create("https://mocki.io/v1/0b14838c-6b95-4072-b38f-d5085d69fd72"))
+                .uri(URI.create("http://localhost:9090/sono.json"))
+                .timeout(Duration.ofMillis(100))
                 .build();
         final HttpResponse<InputStream> httpResponse = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofInputStream());
         final ObjectMapper objectMapper = new ObjectMapper();
@@ -75,4 +84,13 @@ public class SimpleFunction implements HandlerFunction<ServerResponse>, Configur
                 .body(employee);
     }
 
+    private void log(final String log) {
+        String message = String.format("[%s] [%s-%s] [%s]: %s",
+                new Date(),
+                Thread.currentThread().getId(),
+                Thread.currentThread().getName(),
+                this.getClass().getSimpleName(),
+                log);
+        System.out.println(message);
+    }
 }
