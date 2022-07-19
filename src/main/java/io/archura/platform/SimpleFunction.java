@@ -19,13 +19,12 @@ import java.time.Duration;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Executors;
 
 @Component
 public class SimpleFunction implements HandlerFunction<ServerResponse>, Configurable {
 
     private final Map<String, Object> configuration = new HashMap<>();
-    private final HttpClient buildInHttpClient = HttpClient.newBuilder().executor(Executors.newSingleThreadExecutor()).build();
+    private final HttpClient buildInHttpClient = HttpClient.newBuilder().connectTimeout(Duration.ofMillis(1000)).build();
 
     @Override
     public void setConfiguration(Map<String, Object> config) {
@@ -34,7 +33,7 @@ public class SimpleFunction implements HandlerFunction<ServerResponse>, Configur
 
     @Override
     public ServerResponse handle(ServerRequest request) throws IOException, InterruptedException {
-        log("SimpleFunction request = " + request + " configuration: " + configuration);
+        log("request = " + request + " configuration: " + configuration);
         request.attribute(Cache.class.getSimpleName())
                 .map(Cache.class::cast)
                 .ifPresent(cache -> {
@@ -63,21 +62,16 @@ public class SimpleFunction implements HandlerFunction<ServerResponse>, Configur
                     log("map = " + map);
                 });
 
-        final HttpClient httpClient = request.attribute(HttpClient.class.getSimpleName())
-                .map(HttpClient.class::cast)
-                .orElseGet(() -> {
-                    log("No HttpClient provided, will use the internal HttpClient.");
-                    return buildInHttpClient;
-                });
-
         final HttpRequest httpRequest = HttpRequest.newBuilder()
                 .GET()
                 .uri(URI.create("http://localhost:9090/sono.json"))
                 .timeout(Duration.ofMillis(100))
                 .build();
-        final HttpResponse<InputStream> httpResponse = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofInputStream());
+        final HttpResponse<InputStream> httpResponse = buildInHttpClient
+                .send(httpRequest, HttpResponse.BodyHandlers.ofInputStream());
         final ObjectMapper objectMapper = new ObjectMapper();
         final Employee employee = objectMapper.readValue(httpResponse.body(), Employee.class);
+        log(employee.toString());
 
         return ServerResponse.ok()
                 .header("SIMPLE_FUNCTION_HEADER", "GOT_EMPLOYEE")
