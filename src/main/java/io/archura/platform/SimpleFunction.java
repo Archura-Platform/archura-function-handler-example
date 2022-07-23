@@ -74,7 +74,7 @@ public class SimpleFunction implements HandlerFunction<ServerResponse>, Configur
         final HttpRequest httpRequest = HttpRequest.newBuilder()
                 .GET()
                 .uri(URI.create("http://localhost:9090/sono.json"))
-                .header("Forwarded", request.headers().firstHeader("Forwarded"))
+                .header("Forwarded", Optional.ofNullable(request.headers().firstHeader("Forwarded")).orElse(""))
                 .timeout(Duration.ofMillis(100))
                 .build();
         final HttpResponse<InputStream> httpResponse = httpClient
