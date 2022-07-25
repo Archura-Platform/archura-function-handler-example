@@ -71,10 +71,15 @@ public class SimpleFunction implements HandlerFunction<ServerResponse>, Configur
                         }
                 );
 
+        final String url = Optional.ofNullable(configuration.get("JSON_URL"))
+                .map(String::valueOf)
+                .orElse("http://192.168.68.118:9090/sono.json");
+        final String forwarded = Optional.ofNullable(request.headers().firstHeader("Forwarded"))
+                .orElse("");
         final HttpRequest httpRequest = HttpRequest.newBuilder()
                 .GET()
-                .uri(URI.create("http://localhost:9090/sono.json"))
-                .header("Forwarded", Optional.ofNullable(request.headers().firstHeader("Forwarded")).orElse(""))
+                .uri(URI.create(url))
+                .header("Forwarded", forwarded)
                 .timeout(Duration.ofMillis(100))
                 .build();
         final HttpResponse<InputStream> httpResponse = httpClient
