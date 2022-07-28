@@ -69,7 +69,7 @@
                                     <mainClass>io.archura.platform.imperativeshell.handler.SimpleFunction</mainClass>
                                 </transformer>
                             </transformers>
-                            <finalName>io.archura.platform.SimpleFunction-0.0.1</finalName>
+                            <finalName>io.archura.platform.imperativeshell.handler.SimpleFunction-0.0.1</finalName>
                         </configuration>
                     </execution>
                 </executions>
