@@ -1,4 +1,4 @@
-package io.archura.platform.model;
+package io.archura.platform.imperativeshell.handler.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

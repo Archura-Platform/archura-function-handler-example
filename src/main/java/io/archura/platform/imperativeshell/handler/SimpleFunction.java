@@ -1,11 +1,11 @@
-package io.archura.platform;
+package io.archura.platform.imperativeshell.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.archura.platform.cache.Cache;
-import io.archura.platform.context.Context;
-import io.archura.platform.function.Configurable;
-import io.archura.platform.logging.Logger;
-import io.archura.platform.model.Employee;
+import io.archura.platform.api.cache.Cache;
+import io.archura.platform.api.context.Context;
+import io.archura.platform.api.logger.Logger;
+import io.archura.platform.api.type.Configurable;
+import io.archura.platform.imperativeshell.handler.model.Employee;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.function.HandlerFunction;
 import org.springframework.web.servlet.function.ServerRequest;
