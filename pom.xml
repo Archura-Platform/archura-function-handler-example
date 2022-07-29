@@ -12,7 +12,7 @@
         <java.version>17</java.version>
         <compiler.source>17</compiler.source>
         <compiler.target>17</compiler.target>
-        <archura-platform-api.version>0.0.1</archura-platform-api.version>
+        <archura-platform-api.version>0.0.2</archura-platform-api.version>
     </properties>
 
     <dependencies>
