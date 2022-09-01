@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.archura.platform.api.cache.Cache;
 import io.archura.platform.api.context.Context;
 import io.archura.platform.api.logger.Logger;
-import io.archura.platform.api.stream.Stream;
+import io.archura.platform.api.stream.LightStream;
 import io.archura.platform.api.type.Configurable;
 import io.archura.platform.imperativeshell.handler.model.Employee;
 import io.archura.platform.imperativeshell.handler.model.Movie;
@@ -33,7 +33,7 @@ import java.util.Random;
 public class SimpleFunction implements HandlerFunction<ServerResponse>, Configurable {
 
     private Map<String, Object> configuration;
-    private Random random = new Random();
+    private final Random random = new Random();
 
     @Override
     public void setConfiguration(Map<String, Object> configuration) {
@@ -44,7 +44,7 @@ public class SimpleFunction implements HandlerFunction<ServerResponse>, Configur
     public ServerResponse handle(ServerRequest request) throws IOException, InterruptedException {
         final Context context = (Context) request.attributes().get(Context.class.getSimpleName());
         final Optional<Cache> optionalCache = context.getCache();
-        final Optional<Stream> optionalStream = context.getStream();
+        final Optional<LightStream> optionalStream = context.getLightStream();
         final HttpClient httpClient = context.getHttpClient();
         final Logger logger = context.getLogger();
         logger.info("request = " + request + " configuration: " + configuration);
@@ -87,18 +87,14 @@ public class SimpleFunction implements HandlerFunction<ServerResponse>, Configur
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }
-            final String key = String.valueOf(System.currentTimeMillis());
-            final Stream.Record movieRecord = Stream.Record.builder()
-                    .key(key.getBytes(StandardCharsets.UTF_8))
-                    .value(movieString.getBytes(StandardCharsets.UTF_8))
-                    .build();
+            final byte[] value = movieString.getBytes(StandardCharsets.UTF_8);
 
             final String topic = Optional.ofNullable(configuration.get("topicName"))
                     .map(String::valueOf)
                     .orElse("movies");
 
-            logger.info("will send key '%s' and value '%s' to topic '%s'", key, movieString, topic);
-            stream.send(topic, movieRecord);
+            final String key = stream.send(topic, value).orElse("UNKNOWN_KEY");
+            logger.info("Sent value '%s' for key '%s' to topic '%s'", key, movieString, topic);
         });
 
         final String url = Optional.ofNullable(configuration.get("JSON_URL"))
