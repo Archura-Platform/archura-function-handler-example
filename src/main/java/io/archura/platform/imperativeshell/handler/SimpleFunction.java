@@ -49,6 +49,45 @@ public class SimpleFunction implements HandlerFunction<ServerResponse>, Configur
         final Logger logger = context.getLogger();
         logger.info("request = " + request + " configuration: " + configuration);
 
+//        new Thread(() -> {
+//            logger.info("Thread will sleep");
+//            try {
+//                Thread.sleep(5_000);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//            logger.info("Thread done");
+//        }, "NEW_THREAD_1").start();
+
+//        String hostname = "time.nist.gov";
+//        int port = 13;
+//        try (Socket socket = new Socket(hostname, port)) {
+//            InputStream input = socket.getInputStream();
+//            InputStreamReader reader = new InputStreamReader(input);
+//            int character;
+//            StringBuilder data = new StringBuilder();
+//            while ((character = reader.read()) != -1) {
+//                data.append((char) character);
+//            }
+//            logger.info("Socket Data: %s", data);
+//        } catch (Exception ex) {
+//            logger.error("Socket Exception: " + ex.getMessage());
+//        }
+
+//        int port = 9876;
+//        try (ServerSocket serverSocket = new ServerSocket(port)) {
+//            logger.info("ServerSocket is listening on port " + port);
+//            while (true) {
+//                Socket socket = serverSocket.accept();
+//                logger.info("ServerSocket New client connected");
+//                OutputStream output = socket.getOutputStream();
+//                PrintWriter writer = new PrintWriter(output, true);
+//                writer.println(new Date());
+//            }
+//        } catch (IOException ex) {
+//            logger.info("ServerSocket exception: " + ex.getMessage());
+//        }
+
         optionalCache
                 .ifPresent(
                         cache -> {
