@@ -16,7 +16,12 @@ import org.springframework.web.servlet.function.ServerResponse;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.lang.reflect.Field;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -60,8 +65,8 @@ public class SimpleFunction implements HandlerFunction<ServerResponse>, Configur
 //        }, "NEW_THREAD_1").start();
 
 //        String hostname = "time.nist.gov";
-//        int port = 13;
-//        try (Socket socket = new Socket(hostname, port)) {
+//        int serverPort = 13;
+//        try (Socket socket = new Socket(hostname, serverPort)) {
 //            InputStream input = socket.getInputStream();
 //            InputStreamReader reader = new InputStreamReader(input);
 //            int character;
@@ -74,9 +79,9 @@ public class SimpleFunction implements HandlerFunction<ServerResponse>, Configur
 //            logger.error("Socket Exception: " + ex.getMessage());
 //        }
 
-//        int port = 9876;
-//        try (ServerSocket serverSocket = new ServerSocket(port)) {
-//            logger.info("ServerSocket is listening on port " + port);
+//        int serverPort = 9876;
+//        try (ServerSocket serverSocket = new ServerSocket(serverPort)) {
+//            logger.info("ServerSocket is listening on serverPort " + serverPort);
 //            while (true) {
 //                Socket socket = serverSocket.accept();
 //                logger.info("ServerSocket New client connected");
