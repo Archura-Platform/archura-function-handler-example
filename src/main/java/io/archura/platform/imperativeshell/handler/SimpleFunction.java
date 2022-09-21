@@ -114,6 +114,36 @@ public class SimpleFunction implements HandlerFunction<ServerResponse>, Configur
             logger.info("URL Exception: " + ex.getMessage());
         }
 
+        try {
+            Thread.startVirtualThread(() -> {
+                logger.info("VirtualThread1 will sleep");
+                try {
+                    Thread.sleep(5_000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                logger.info("VirtualThread1 done");
+            });
+        } catch (Exception ex) {
+            logger.error("VirtualThread1 Exception: " + ex.getMessage());
+        }
+
+        try {
+            Thread.ofVirtual()
+                    .name("NEW VIRTUAL THREAD")
+                    .start(() -> {
+                        logger.info("VirtualThread2 will sleep");
+                        try {
+                            Thread.sleep(5_000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        logger.info("VirtualThread2 done");
+                    });
+        } catch (Exception ex) {
+            logger.error("VirtualThread2 Exception: " + ex.getMessage());
+        }
+
         optionalCache
                 .ifPresent(
                         cache -> {
