@@ -9,6 +9,7 @@ import io.archura.platform.api.stream.LightStream;
 import io.archura.platform.api.type.Configurable;
 import io.archura.platform.imperativeshell.handler.model.Employee;
 import io.archura.platform.imperativeshell.handler.model.Movie;
+import org.postgresql.Driver;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.function.HandlerFunction;
 import org.springframework.web.servlet.function.ServerRequest;
@@ -29,6 +30,10 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.time.Duration;
 import java.util.Date;
 import java.util.HashMap;
@@ -142,6 +147,24 @@ public class SimpleFunction implements HandlerFunction<ServerResponse>, Configur
                     });
         } catch (Exception ex) {
             logger.error("VirtualThread2 Exception: " + ex.getMessage());
+        }
+
+        logger.info("PostgreSQL connection and query start");
+        Driver driver = new Driver();
+        logger.info("PostgreSQL driver.getClass(): %s", driver.getClass());
+        DriverManager.drivers().forEach(d -> logger.info("PostgreSQL Driver: %s", d.getClass().getName()));
+        try (Connection con = DriverManager.getConnection(
+                "jdbc:postgresql://localhost:5432/postgres",
+                "postgres",
+                "postgres");
+             Statement st = con.createStatement();
+             ResultSet rs = st.executeQuery("SELECT VERSION()")) {
+            if (rs.next()) {
+                logger.info("PostgreSQL query result: %s", rs.getString(1));
+            }
+            logger.info("PostgreSQL connection and query end");
+        } catch (Exception ex) {
+            logger.error("PostgreSQL Exception: " + ex.getMessage());
         }
 
         optionalCache
