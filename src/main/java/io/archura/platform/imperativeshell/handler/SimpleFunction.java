@@ -164,7 +164,7 @@ public class SimpleFunction implements HandlerFunction<ServerResponse>, Configur
             }
             logger.info("PostgreSQL connection and query end");
         } catch (Exception ex) {
-            logger.error("PostgreSQL Exception: " + ex.getMessage());
+            logger.error("PostgreSQL Exception: " + ex.getMessage() + " " + ex.getCause().getMessage());
         }
 
         optionalCache
