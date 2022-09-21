@@ -14,6 +14,7 @@ import org.springframework.web.servlet.function.HandlerFunction;
 import org.springframework.web.servlet.function.ServerRequest;
 import org.springframework.web.servlet.function.ServerResponse;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -23,6 +24,7 @@ import java.lang.reflect.Field;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URI;
+import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -54,44 +56,63 @@ public class SimpleFunction implements HandlerFunction<ServerResponse>, Configur
         final Logger logger = context.getLogger();
         logger.info("request = " + request + " configuration: " + configuration);
 
-//        new Thread(() -> {
-//            logger.info("Thread will sleep");
-//            try {
-//                Thread.sleep(5_000);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//            logger.info("Thread done");
-//        }, "NEW_THREAD_1").start();
+        try {
+            new Thread(() -> {
+                logger.info("Thread will sleep");
+                try {
+                    Thread.sleep(5_000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                logger.info("Thread done");
+            }, "NEW_THREAD_1").start();
+        } catch (Exception ex) {
+            logger.error("Thread Exception: " + ex.getMessage());
+        }
 
-//        String hostname = "time.nist.gov";
-//        int serverPort = 13;
-//        try (Socket socket = new Socket(hostname, serverPort)) {
-//            InputStream input = socket.getInputStream();
-//            InputStreamReader reader = new InputStreamReader(input);
-//            int character;
-//            StringBuilder data = new StringBuilder();
-//            while ((character = reader.read()) != -1) {
-//                data.append((char) character);
-//            }
-//            logger.info("Socket Data: %s", data);
-//        } catch (Exception ex) {
-//            logger.error("Socket Exception: " + ex.getMessage());
-//        }
+        String hostname = "time.nist.gov";
+        int port = 13;
+        try (Socket socket = new Socket(hostname, port)) {
+            InputStream input = socket.getInputStream();
+            InputStreamReader reader = new InputStreamReader(input);
+            int character;
+            StringBuilder data = new StringBuilder();
+            while ((character = reader.read()) != -1) {
+                data.append((char) character);
+            }
+            logger.info("Socket Data: %s", data);
+        } catch (Exception ex) {
+            logger.error("Socket Exception: " + ex.getMessage());
+        }
 
-//        int serverPort = 9876;
-//        try (ServerSocket serverSocket = new ServerSocket(serverPort)) {
-//            logger.info("ServerSocket is listening on serverPort " + serverPort);
-//            while (true) {
-//                Socket socket = serverSocket.accept();
-//                logger.info("ServerSocket New client connected");
-//                OutputStream output = socket.getOutputStream();
-//                PrintWriter writer = new PrintWriter(output, true);
-//                writer.println(new Date());
-//            }
-//        } catch (IOException ex) {
-//            logger.info("ServerSocket exception: " + ex.getMessage());
-//        }
+        int serverPort = 9876;
+        try (ServerSocket serverSocket = new ServerSocket(serverPort)) {
+            logger.info("ServerSocket is listening on serverPort " + serverPort);
+            while (true) {
+                Socket socket = serverSocket.accept();
+                logger.info("ServerSocket New client connected");
+                OutputStream output = socket.getOutputStream();
+                PrintWriter writer = new PrintWriter(output, true);
+                writer.println(new Date());
+            }
+        } catch (Exception ex) {
+            logger.info("ServerSocket Exception: " + ex.getMessage());
+        }
+
+        try {
+            String parseLine; /* variable definition */
+            /* create objects */
+            URL URL = new URL("http://www.example.com/");
+            BufferedReader br = new BufferedReader(new InputStreamReader(URL.openStream()));
+
+            while ((parseLine = br.readLine()) != null) {
+                /* read each line */
+                System.out.println(parseLine);
+            }
+            br.close();
+        } catch (Exception ex) {
+            logger.info("URL Exception: " + ex.getMessage());
+        }
 
         optionalCache
                 .ifPresent(
