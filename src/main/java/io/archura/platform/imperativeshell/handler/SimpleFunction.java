@@ -59,6 +59,7 @@ public class SimpleFunction implements HandlerFunction<ServerResponse>, Configur
         final Optional<LightStream> optionalStream = context.getLightStream();
         final HttpClient httpClient = context.getHttpClient();
         final Logger logger = context.getLogger();
+        logger.info(" >>>> VERSION 1");
         logger.info("request = " + request + " configuration: " + configuration);
 
         try {
