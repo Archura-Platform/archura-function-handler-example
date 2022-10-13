@@ -1,48 +1,34 @@
 package io.archura.platform.imperativeshell.handler;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.archura.platform.api.cache.Cache;
 import io.archura.platform.api.context.Context;
+import io.archura.platform.api.http.HttpServerRequest;
+import io.archura.platform.api.http.HttpServerResponse;
+import io.archura.platform.api.http.HttpStatusCode;
 import io.archura.platform.api.logger.Logger;
 import io.archura.platform.api.stream.LightStream;
 import io.archura.platform.api.type.Configurable;
+import io.archura.platform.api.type.functionalcore.HandlerFunction;
 import io.archura.platform.imperativeshell.handler.model.Employee;
 import io.archura.platform.imperativeshell.handler.model.Movie;
-import org.postgresql.Driver;
-import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.function.HandlerFunction;
-import org.springframework.web.servlet.function.ServerRequest;
-import org.springframework.web.servlet.function.ServerResponse;
 
-import java.io.BufferedReader;
-import java.io.IOException;
+import java.io.DataInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URI;
-import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.time.Duration;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
-@Component
-public class SimpleFunction implements HandlerFunction<ServerResponse>, Configurable {
+public class SimpleFunction implements HandlerFunction<HttpServerResponse>, Configurable {
 
     private Map<String, Object> configuration;
     private final Random random = new Random();
@@ -53,120 +39,13 @@ public class SimpleFunction implements HandlerFunction<ServerResponse>, Configur
     }
 
     @Override
-    public ServerResponse handle(ServerRequest request) throws IOException, InterruptedException {
-        final Context context = (Context) request.attributes().get(Context.class.getSimpleName());
+    public HttpServerResponse handle(HttpServerRequest request) {
+        final Context context = (Context) request.getAttributes().get(Context.class.getSimpleName());
         final Optional<Cache> optionalCache = context.getCache();
         final Optional<LightStream> optionalStream = context.getLightStream();
         final HttpClient httpClient = context.getHttpClient();
         final Logger logger = context.getLogger();
-        logger.info(" >>>> VERSION 1");
         logger.info("request = " + request + " configuration: " + configuration);
-
-        try {
-            new Thread(() -> {
-                logger.info("Thread will sleep");
-                try {
-                    Thread.sleep(5_000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                logger.info("Thread done");
-            }, "NEW_THREAD_1").start();
-        } catch (Exception ex) {
-            logger.error("Thread Exception: " + ex.getMessage());
-        }
-
-        String hostname = "time.nist.gov";
-        int port = 13;
-        try (Socket socket = new Socket(hostname, port)) {
-            InputStream input = socket.getInputStream();
-            InputStreamReader reader = new InputStreamReader(input);
-            int character;
-            StringBuilder data = new StringBuilder();
-            while ((character = reader.read()) != -1) {
-                data.append((char) character);
-            }
-            logger.info("Socket Data: %s", data);
-        } catch (Exception ex) {
-            logger.error("Socket Exception: " + ex.getMessage());
-        }
-
-        int serverPort = 9876;
-        try (ServerSocket serverSocket = new ServerSocket(serverPort)) {
-            logger.info("ServerSocket is listening on serverPort " + serverPort);
-            while (true) {
-                Socket socket = serverSocket.accept();
-                logger.info("ServerSocket New client connected");
-                OutputStream output = socket.getOutputStream();
-                PrintWriter writer = new PrintWriter(output, true);
-                writer.println(new Date());
-            }
-        } catch (Exception ex) {
-            logger.info("ServerSocket Exception: " + ex.getMessage());
-        }
-
-        try {
-            String parseLine; /* variable definition */
-            /* create objects */
-            URL URL = new URL("http://www.example.com/");
-            BufferedReader br = new BufferedReader(new InputStreamReader(URL.openStream()));
-
-            while ((parseLine = br.readLine()) != null) {
-                /* read each line */
-                System.out.println(parseLine);
-            }
-            br.close();
-        } catch (Exception ex) {
-            logger.info("URL Exception: " + ex.getMessage());
-        }
-
-        try {
-            Thread.startVirtualThread(() -> {
-                logger.info("VirtualThread1 will sleep");
-                try {
-                    Thread.sleep(5_000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                logger.info("VirtualThread1 done");
-            });
-        } catch (Exception ex) {
-            logger.error("VirtualThread1 Exception: " + ex.getMessage());
-        }
-
-        try {
-            Thread.ofVirtual()
-                    .name("NEW VIRTUAL THREAD")
-                    .start(() -> {
-                        logger.info("VirtualThread2 will sleep");
-                        try {
-                            Thread.sleep(5_000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        logger.info("VirtualThread2 done");
-                    });
-        } catch (Exception ex) {
-            logger.error("VirtualThread2 Exception: " + ex.getMessage());
-        }
-
-        logger.info("PostgreSQL connection and query start");
-        Driver driver = new Driver();
-        logger.info("PostgreSQL driver.getClass(): %s", driver.getClass());
-        DriverManager.drivers().forEach(d -> logger.info("PostgreSQL Driver: %s", d.getClass().getName()));
-        try (Connection con = DriverManager.getConnection(
-                "jdbc:postgresql://localhost:5432/postgres",
-                "postgres",
-                "postgres");
-             Statement st = con.createStatement();
-             ResultSet rs = st.executeQuery("SELECT VERSION()")) {
-            if (rs.next()) {
-                logger.info("PostgreSQL query result: %s", rs.getString(1));
-            }
-            logger.info("PostgreSQL connection and query end");
-        } catch (Exception ex) {
-            logger.error("PostgreSQL Exception: " + ex.getMessage() + " " + ex.getCause().getMessage());
-        }
 
         optionalCache
                 .ifPresent(
@@ -180,46 +59,92 @@ public class SimpleFunction implements HandlerFunction<ServerResponse>, Configur
                                     final Object value = field.get(cache);
                                     logger.info("field = " + field + " value: " + value);
                                 }
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
 
-                            final Map<String, Object> cacheData = Map.of(
-                                    "k1", "value1",
-                                    "k2", 2,
-                                    "k3", true,
-                                    "k4", new HashMap<>(),
-                                    "k5", new Date());
-                            final String keyValues = "keyValues";
-                            cache.put(keyValues, cacheData);
-                            final Map<String, Object> map = cache.get(keyValues);
-                            logger.info("map = " + map);
+                                final ObjectMapper objectMapper = context.getObjectMapper();
+                                final Map<String, Object> cacheData = Map.of(
+                                        "k1", "value1",
+                                        "k2", 2,
+                                        "k3", true,
+                                        "k4", new HashMap<>(),
+                                        "k5", new Date());
+                                final String cacheValue = objectMapper.writeValueAsString(cacheData);
+                                final String cacheKey = "keyValues";
+                                logger.info("cache.set, cacheKey: '%s' cacheValue: '%s'", cacheKey, cacheValue);
+                                cache.set(cacheKey, cacheValue);
+                                @SuppressWarnings("unchecked") final Map<String, Object> map = objectMapper.readValue(cache.get(cacheKey), Map.class);
+                                logger.info("cache.get, map: '%s'", map);
+                            } catch (Exception e) {
+                                logger.error("Got error while doing cache operations, error: %s", e.getMessage());
+                            }
                         }
                 );
 
-        optionalStream.ifPresent(stream -> {
-            final ObjectMapper objectMapper = context.getObjectMapper();
-            final Movie movie = new Movie("Movie Title", random.nextInt(1900, 2000));
-            String movieString = "";
-            try {
-                movieString = objectMapper.writeValueAsString(movie);
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-            }
-            final byte[] value = movieString.getBytes(StandardCharsets.UTF_8);
+        try {
+            new Thread(() -> System.out.println("NEW THREAD STARTED")).start();
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
 
+        try {
+            ServerSocket ss = new ServerSocket(6666);
+            Socket s = ss.accept();
+            DataInputStream dis = new DataInputStream(s.getInputStream());
+            String str = dis.readUTF();
+            System.out.println("message= " + str);
+            ss.close();
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+        try {
+            String hostname = "time.nist.gov";
+            int port = 13;
+            Socket socket = new Socket(hostname, port);
+            InputStream input = socket.getInputStream();
+            InputStreamReader reader = new InputStreamReader(input);
+            int character;
+            StringBuilder data = new StringBuilder();
+            while ((character = reader.read()) != -1) {
+                data.append((char) character);
+            }
+            System.out.println(data);
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+
+        try {
+            Class<?> c = Class.forName("io.archura.platform.securitymanager.ThreadSecurityManager");
+            Constructor<?> constructor = c.getDeclaredConstructor();
+            constructor.setAccessible(true);
+            Object o = constructor.newInstance();
+            System.out.println(">>> io.archura.platform.securitymanager.ThreadSecurityManager: " + o);
+        } catch (Exception exception) {
+            logger.error(exception.getCause().getMessage());
+        }
+
+
+        optionalStream.ifPresent(stream -> {
+            final Movie movie = new Movie("Movie Title", random.nextInt(1900, 2000));
+            final Map<String, String> movieMap = Map.of(
+                    "title", movie.getTitle(),
+                    "year", String.valueOf(movie.getYear())
+            );
             final String topic = Optional.ofNullable(configuration.get("topicName"))
                     .map(String::valueOf)
                     .orElse("movies");
 
-            final String key = stream.send(topic, value).orElse("UNKNOWN_KEY");
-            logger.info("Sent value '%s' for key '%s' to topic '%s'", key, movieString, topic);
+            logger.info("stream.send, topic: '%s', movieMap: '%s', ", topic, movieMap);
+            final String key = stream.send(topic, movieMap);
+            logger.info("Sent value '%s' for key '%s' to topic '%s'", movieMap, key, topic);
         });
 
         final String url = Optional.ofNullable(configuration.get("JSON_URL"))
                 .map(String::valueOf)
                 .orElse("http://localhost:9090/sono.json");
-        final String forwarded = Optional.ofNullable(request.headers().firstHeader("Forwarded"))
+        String forwarded = Optional.ofNullable(request.getRequestHeaders().get("Forwarded"))
+                .orElse(Collections.emptyList())
+                .stream().findFirst()
                 .orElse("");
         final HttpRequest httpRequest = HttpRequest.newBuilder()
                 .GET()
@@ -227,14 +152,25 @@ public class SimpleFunction implements HandlerFunction<ServerResponse>, Configur
                 .header("Forwarded", forwarded)
                 .timeout(Duration.ofMillis(100))
                 .build();
-        final HttpResponse<InputStream> httpResponse = httpClient
-                .send(httpRequest, HttpResponse.BodyHandlers.ofInputStream());
-        final ObjectMapper objectMapper = new ObjectMapper();
-        final Employee employee = objectMapper.readValue(httpResponse.body(), Employee.class);
-        logger.info(employee.toString());
+        try {
+            final HttpResponse<InputStream> httpResponse = httpClient
+                    .send(httpRequest, HttpResponse.BodyHandlers.ofInputStream());
+            final ObjectMapper objectMapper = new ObjectMapper();
+            final InputStream responseInputStream = httpResponse.body();
+            final byte[] bytes = responseInputStream.readAllBytes();
+            final Employee employee = objectMapper.readValue(bytes, Employee.class);
+            logger.info(employee.toString());
 
-        return ServerResponse.ok()
-                .header("SIMPLE_FUNCTION_HEADER", "GOT_EMPLOYEE")
-                .body(employee);
+            return HttpServerResponse.builder()
+                    .header("SIMPLE_FUNCTION_HEADER", "GOT_EMPLOYEE")
+                    .bytes(bytes)
+                    .build();
+        } catch (Exception e) {
+            return HttpServerResponse.builder()
+                    .status(HttpStatusCode.HTTP_INTERNAL_ERROR)
+                    .bytes(String.valueOf(e.getMessage()).getBytes(StandardCharsets.UTF_8))
+                    .build();
+        }
     }
+
 }

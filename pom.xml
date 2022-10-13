@@ -12,23 +12,21 @@
         <java.version>19</java.version>
         <compiler.source>19</compiler.source>
         <compiler.target>19</compiler.target>
-        <archura-platform-api.version>0.0.3</archura-platform-api.version>
+        <archura-platform-api.version>0.0.4</archura-platform-api.version>
         <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
         <maven-shade-plugin.version>3.3.0</maven-shade-plugin.version>
+        <jackson-databind.version>2.13.4</jackson-databind.version>
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>42.2.0</version>
-        </dependency>
+        <!-- PACK WITH -->
 
+        <!-- PROVIDED -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-            <version>2.7.0</version>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson-databind.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
