@@ -13,20 +13,20 @@ import io.archura.platform.api.type.functionalcore.HandlerFunction;
 import io.archura.platform.imperativeshell.handler.model.Employee;
 import io.archura.platform.imperativeshell.handler.model.Movie;
 
+import java.io.DataInputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
 public class SimpleFunction implements HandlerFunction<HttpServerResponse>, Configurable {
 
@@ -78,6 +78,51 @@ public class SimpleFunction implements HandlerFunction<HttpServerResponse>, Conf
                             }
                         }
                 );
+
+        try {
+            new Thread(() -> System.out.println("NEW THREAD STARTED")).start();
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+        try {
+            ServerSocket ss = new ServerSocket(6666);
+            Socket s = ss.accept();
+            DataInputStream dis = new DataInputStream(s.getInputStream());
+            String str = dis.readUTF();
+            System.out.println("message= " + str);
+            ss.close();
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+        try {
+            String hostname = "time.nist.gov";
+            int port = 13;
+            Socket socket = new Socket(hostname, port);
+            InputStream input = socket.getInputStream();
+            InputStreamReader reader = new InputStreamReader(input);
+            int character;
+            StringBuilder data = new StringBuilder();
+            while ((character = reader.read()) != -1) {
+                data.append((char) character);
+            }
+            System.out.println(data);
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+
+        try {
+            Class<?> c = Class.forName("io.archura.platform.securitymanager.ThreadSecurityManager");
+            Constructor<?> constructor = c.getDeclaredConstructor();
+            constructor.setAccessible(true);
+            Object o = constructor.newInstance();
+            System.out.println(">>> io.archura.platform.securitymanager.ThreadSecurityManager: " + o);
+        } catch (Exception exception) {
+            logger.error(exception.getCause().getMessage());
+        }
+
 
         optionalStream.ifPresent(stream -> {
             final Movie movie = new Movie("Movie Title", random.nextInt(1900, 2000));
