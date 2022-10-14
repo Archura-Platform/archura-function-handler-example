@@ -162,6 +162,7 @@ public class SimpleFunction implements Function<HttpServerRequest, HttpServerRes
             logger.info(employee.toString());
 
             return HttpServerResponse.builder()
+                    .status(HttpStatusCode.HTTP_OK)
                     .header("SIMPLE_FUNCTION_HEADER", "GOT_EMPLOYEE")
                     .bytes(bytes)
                     .build();
