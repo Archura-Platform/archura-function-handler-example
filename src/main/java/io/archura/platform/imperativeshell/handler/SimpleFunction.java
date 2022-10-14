@@ -9,7 +9,6 @@ import io.archura.platform.api.http.HttpStatusCode;
 import io.archura.platform.api.logger.Logger;
 import io.archura.platform.api.stream.LightStream;
 import io.archura.platform.api.type.Configurable;
-import io.archura.platform.api.type.functionalcore.HandlerFunction;
 import io.archura.platform.imperativeshell.handler.model.Employee;
 import io.archura.platform.imperativeshell.handler.model.Movie;
 
@@ -27,8 +26,9 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.*;
+import java.util.function.Function;
 
-public class SimpleFunction implements HandlerFunction<HttpServerResponse>, Configurable {
+public class SimpleFunction implements Function<HttpServerRequest, HttpServerResponse>, Configurable {
 
     private Map<String, Object> configuration;
     private final Random random = new Random();
@@ -39,7 +39,7 @@ public class SimpleFunction implements HandlerFunction<HttpServerResponse>, Conf
     }
 
     @Override
-    public HttpServerResponse handle(HttpServerRequest request) {
+    public HttpServerResponse apply(HttpServerRequest request) {
         final Context context = (Context) request.getAttributes().get(Context.class.getSimpleName());
         final Optional<Cache> optionalCache = context.getCache();
         final Optional<LightStream> optionalStream = context.getLightStream();
