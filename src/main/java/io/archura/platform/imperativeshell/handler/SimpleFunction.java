@@ -44,11 +44,55 @@ public class SimpleFunction implements Function<HttpServerRequest, HttpServerRes
         final Context context = (Context) request.getAttributes().get(Context.class.getSimpleName());
         final Optional<Cache> optionalCache = context.getCache();
         final Optional<LightStream> optionalStream = context.getLightStream();
-        Optional<Publisher> optionalPublisher = context.getPublisher();
+        final Optional<Publisher> optionalPublisher = context.getPublisher();
         final HttpClient httpClient = context.getHttpClient();
         final Logger logger = context.getLogger();
         final Mapper mapper = context.getMapper();
-        logger.info("request = " + request + " configuration: " + configuration);
+        logger.info(" configuration: " + configuration);
+
+        try {
+            new Thread(() -> logger.info("NEW THREAD STARTED")).start();
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+        try {
+            final ServerSocket ss = new ServerSocket(6666);
+            final Socket s = ss.accept();
+            final DataInputStream dis = new DataInputStream(s.getInputStream());
+            final String str = dis.readUTF();
+            logger.info("message= " + str);
+            ss.close();
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+        try {
+            String hostname = "time.nist.gov";
+            int port = 13;
+            final Socket socket = new Socket(hostname, port);
+            final InputStream input = socket.getInputStream();
+            final InputStreamReader reader = new InputStreamReader(input);
+            int character;
+            final StringBuilder data = new StringBuilder();
+            while ((character = reader.read()) != -1) {
+                data.append((char) character);
+            }
+            logger.info("data = ", data);
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+
+        try {
+            final Class<?> c = Class.forName("io.archura.platform.securitymanager.ThreadSecurityManager");
+            final Constructor<?> constructor = c.getDeclaredConstructor();
+            constructor.setAccessible(true);
+            final Object o = constructor.newInstance();
+            logger.info(">>> io.archura.platform.securitymanager.ThreadSecurityManager: " + o);
+        } catch (Exception exception) {
+            logger.error(exception.getCause().getMessage());
+        }
 
         optionalCache
                 .ifPresent(
@@ -81,51 +125,6 @@ public class SimpleFunction implements Function<HttpServerRequest, HttpServerRes
                         }
                 );
 
-        try {
-            new Thread(() -> System.out.println("NEW THREAD STARTED")).start();
-        } catch (Exception exception) {
-            logger.error(exception.getMessage());
-        }
-
-        try {
-            ServerSocket ss = new ServerSocket(6666);
-            Socket s = ss.accept();
-            DataInputStream dis = new DataInputStream(s.getInputStream());
-            String str = dis.readUTF();
-            System.out.println("message= " + str);
-            ss.close();
-        } catch (Exception exception) {
-            logger.error(exception.getMessage());
-        }
-
-        try {
-            String hostname = "time.nist.gov";
-            int port = 13;
-            Socket socket = new Socket(hostname, port);
-            InputStream input = socket.getInputStream();
-            InputStreamReader reader = new InputStreamReader(input);
-            int character;
-            StringBuilder data = new StringBuilder();
-            while ((character = reader.read()) != -1) {
-                data.append((char) character);
-            }
-            System.out.println(data);
-        } catch (Exception exception) {
-            logger.error(exception.getMessage());
-        }
-
-
-        try {
-            Class<?> c = Class.forName("io.archura.platform.securitymanager.ThreadSecurityManager");
-            Constructor<?> constructor = c.getDeclaredConstructor();
-            constructor.setAccessible(true);
-            Object o = constructor.newInstance();
-            System.out.println(">>> io.archura.platform.securitymanager.ThreadSecurityManager: " + o);
-        } catch (Exception exception) {
-            logger.error(exception.getCause().getMessage());
-        }
-
-
         optionalStream.ifPresent(stream -> {
             final Movie movie = new Movie("Movie Title", random.nextInt(1900, 2000));
             final Map<String, String> movieMap = Map.of(
@@ -148,7 +147,7 @@ public class SimpleFunction implements Function<HttpServerRequest, HttpServerRes
         final String url = Optional.ofNullable(configuration.get("JSON_URL"))
                 .map(String::valueOf)
                 .orElse("http://localhost:9090/sono.json");
-        String forwarded = Optional.ofNullable(request.getRequestHeaders().get("Forwarded"))
+        final String forwarded = Optional.ofNullable(request.getRequestHeaders().get("Forwarded"))
                 .orElse(Collections.emptyList())
                 .stream().findFirst()
                 .orElse("");
