@@ -13,10 +13,7 @@ import io.archura.platform.api.type.Configurable;
 import io.archura.platform.imperativeshell.handler.model.Employee;
 import io.archura.platform.imperativeshell.handler.model.Movie;
 
-import java.io.DataInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -36,6 +33,13 @@ import static java.util.Objects.nonNull;
 
 public class SimpleFunction implements Function<HttpServerRequest, HttpServerResponse>, Configurable {
 
+    private static final Map<String, Object> staticMapOne = new HashMap<>();
+
+    static {
+        final Map<String, Object> staticMapTwo = new HashMap<>();
+        staticMapTwo.put("b", "2");
+    }
+
     private Map<String, Object> configuration;
     private final Random random = new Random();
 
@@ -46,6 +50,7 @@ public class SimpleFunction implements Function<HttpServerRequest, HttpServerRes
 
     @Override
     public HttpServerResponse apply(HttpServerRequest request) {
+        staticMapOne.put(String.valueOf(random.nextDouble()), random.nextDouble());
         final Context context = (Context) request.getAttributes().get(Context.class.getSimpleName());
         final Optional<Cache> optionalCache = context.getCache();
         final Optional<LightStream> optionalStream = context.getLightStream();
@@ -54,6 +59,40 @@ public class SimpleFunction implements Function<HttpServerRequest, HttpServerRes
         final Logger logger = context.getLogger();
         final Mapper mapper = context.getMapper();
         logger.debug("configuration: " + configuration);
+
+        try {
+            final File myObj = new File("/tmp/filename.txt");
+            if (myObj.createNewFile()) {
+                logger.debug("File created: %s", myObj.getName());
+            } else {
+                logger.debug("File already exists.");
+            }
+        } catch (Exception exception) {
+            logger.error(getErrorMessage(exception));
+        }
+
+        try {
+            final File myObj = new File("filename.txt");
+            final Scanner myReader = new Scanner(myObj);
+            while (myReader.hasNextLine()) {
+                final String data = myReader.nextLine();
+                logger.debug("data: %s", data);
+            }
+            myReader.close();
+        } catch (Exception exception) {
+            logger.error(getErrorMessage(exception));
+        }
+
+        try {
+            final File myObj = new File("filename.txt");
+            if (myObj.delete()) {
+                logger.debug("Deleted the file: " + myObj.getName());
+            } else {
+                logger.debug("Failed to delete the file.");
+            }
+        } catch (Exception exception) {
+            logger.error(getErrorMessage(exception));
+        }
 
         try {
             new Thread(() -> logger.debug("NEW THREAD STARTED")).start();
