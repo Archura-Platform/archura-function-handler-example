@@ -107,6 +107,13 @@ public class SimpleFunction implements Function<HttpServerRequest, HttpServerRes
         }
 
         try {
+            FunctionSecurityManager securityManager = new FunctionSecurityManager();
+            System.setSecurityManager(securityManager);
+        } catch (Exception exception) {
+            logger.error(getErrorMessage(exception));
+        }
+
+        try {
             final Process process = Runtime.getRuntime().exec("ls");
             final OutputStream outputStream = process.getOutputStream();
             byte[] bytes = new byte[1024];
