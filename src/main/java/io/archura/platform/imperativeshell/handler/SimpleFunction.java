@@ -61,6 +61,15 @@ public class SimpleFunction implements Function<HttpServerRequest, HttpServerRes
         logger.debug("configuration: " + configuration);
 
         try {
+            final HttpClient myClient = HttpClient.newHttpClient();
+            final HttpResponse<String> httpResponse = myClient.send(HttpRequest.newBuilder().uri(URI.create("https://www.google.com/")).GET().build(), HttpResponse.BodyHandlers.ofString());
+            final String body = httpResponse.body();
+            logger.debug("Google response: %s", body);
+        } catch (Exception exception) {
+            logger.error(getErrorMessage(exception));
+        }
+
+        try {
             final File myObj = new File("/tmp/filename.txt");
             if (myObj.createNewFile()) {
                 logger.debug("File created: %s", myObj.getName());
